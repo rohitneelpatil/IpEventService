@@ -1,0 +1,143 @@
+
+Server Implementation (Implement a rest api based service with 3 apis hosted on a Apache TomcatServer)
+
+
+- Server Class will hold a global ApplicationMap<app_id,Application> which will be accessible by all the api calls
+
+
+Application Model :
+
+Application {
+	
+	string app_id    // unique ID for the app
+
+	Set all_ips     // List of all ipAddresses processed for this App
+
+    Map cidr_ip_map (Map<cidr_28,List<ipAddress>)       // Map key would be a CIDR_Prefix(netblock) /28 represention of ipAddresses
+                                                       // Map value would be All IpAddresses which match the netblock representation
+}
+
+
+
+
+Service Apis --
+
+
+1.
+
+POST request 
+
+endpoint : /events
+Content-Type : 'application/octet-stream'
+
+
+Input from client program:
+Protocol Buffer Entity 
+(encoded description of the app in question and the IP address it connected to)
+
+
+pseudo method :
+
+
+ public void processEvents(){
+
+  1. Decode Protocol Buffer Entity using protoBuf libraries and ip_event.proto protobuf definition
+
+  2. Use the decoded protobuf to fetch
+      a. app_id
+      b. decimal representation of ip address
+
+  3. Get or Create Application Model object (appObject) for this app_id by checking into the global ApplicationMap
+
+  4. Get 32 bit representation from decimal ip address and determine 28 bit representation (Cidr_Prefix/netblock) for SubnetMask and CIDR prefix /28
+
+  5.  Check appObject attribute 
+       if(appObject.cidr_ip_map already contains this netblock) 
+             add current ipaddress to this netblock list
+       else
+            add netblock to appObject.cidr_ip_map with value as a new List containing current ipaddress 
+
+ }
+
+
+
+
+
+2.
+
+GET request 
+
+endpoint : /events/
+params : :app_sha256 i.e app_id
+Accept : 'application/json'
+
+
+
+Gives a description of all events for that app_sha256. 
+
+This should be of the form:
+{
+  'count':NUMBER_OF_EVENTS,
+  'good_ips':LIST_OF_GOOD_IPS,
+  'bad_ips':LIST_OF_BAD_IPS
+}
+
+pseudo method :
+
+
+ public String public String fetchApplicationEvents(String app_id) {
+
+
+   1. Use the app_id to get Application Model object (appObject) from global ApplicationMap
+
+   2.  Logic to Determine Good and Bad Ips.
+
+       The netblock containing the good_ips will be the most dense netblock for a particular app.
+       The netblock with the most recorded ip events.
+
+        a.
+	       appObject.cidr_ip_map element with maximum size 
+	       i.e. netblock with maximum number of IpAddresses adhering to it can we considered as a subnetMask/28
+	       All those corresponding ipAddress can be considered as GOOD_IPS
+
+        b.  
+           BAD_IPS = all_ips - GOOD_IPS
+
+
+   3. Format the response json and return
+
+ }
+
+
+
+3.  
+Request DELETE
+
+endpoint : /events
+
+
+pseudo method :
+public void deleteEvents(){
+
+	 ApplicationMap.clear() 
+
+	 // Clear out the global ApplicationMap to be ready for handling next set of events posted
+	//  This is used to reset counters and data in between test runs.
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+Assumptions :
+
+1. We do not probably want to get events from different test_runs and DELETE request is called client program terminates.
+2. Going with above assumption, we do not want an external storage (database) to store the events.

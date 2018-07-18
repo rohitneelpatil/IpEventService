@@ -1,0 +1,46 @@
+Project Environment Requirements
+java:8.0_161
+apache-tomcat:7.0.90
+junit:4.12
+
+
+
+
+
+
+Running project on an IDE.
+
+1. Unzip the project zip 
+
+2. Import as existing projects into workspace (Maven Project)
+
+3. Build project 
+
+4. The project has embedded Apache Tomcat required for testing the service.
+
+5. Run project as maven build script with goals (tomcat7:run)
+
+6. Test the service using :
+   ./bin/lookout_backend_coding_q2_client --host localhost --tcp 8080
+
+7. Unit/Function Test Cases can be run as JUnit Test
+
+
+
+Deploy service on local machine.
+
+1. Prerequisites: Apache Tomcat Server Running on a local machine
+
+2. Export project as WAR file/ Use the WAR file provided in the zip
+
+3. Place the war file as ROOT.war in webapps folder for Apache Tomcat
+
+4. Test the service using :
+   ./bin/lookout_backend_coding_q2_client --host localhost --tcp 8080
+
+
+
+Test the service on from external host.
+
+1. Test the service using :
+   ./bin/lookout_backend_coding_q2_client --host 54.86.73.176 --tcp 8080
