@@ -7,7 +7,6 @@ junit:4.12
 
 
 
-
 Running project on an IDE.
 
 1. Unzip the project zip 
@@ -40,7 +39,7 @@ Deploy service on local machine.
 
 
 
-Test the service on from external host.
+Test the service on an external host.
 
 1. Test the service using :
    ./bin/lookout_backend_coding_q2_client --host 54.86.73.176 --tcp 8080
